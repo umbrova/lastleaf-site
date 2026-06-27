@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy — Lastleaf</title>
+  <meta name="description" content="Lastleaf privacy policy — what data we collect and how we use it."/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --amber:        #854F0B;
+      --amber-pale:   #FDF3E3;
+      --amber-border: #E8C98A;
+      --text:         #1C1A14;
+      --muted:        #6B5F47;
+      --border:       #e8e4dc;
+      --bg:           #ffffff;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--bg); line-height: 1.7; }
+    a { color: var(--amber); }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px; border-bottom: 0.5px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--text); text-decoration: none; }
+    .nav-back { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .nav-back:hover { color: var(--amber); }
+
+    main { max-width: 680px; margin: 0 auto; padding: 56px 24px 80px; }
+    .page-label { font-size: 12px; font-weight: 500; color: var(--amber); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+    h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .updated { font-size: 13px; color: var(--muted); margin-bottom: 48px; padding-bottom: 24px; border-bottom: 0.5px solid var(--border); }
+
+    h2 { font-size: 18px; font-weight: 600; margin: 36px 0 10px; }
+    p { font-size: 15px; color: #3a3630; margin-bottom: 14px; line-height: 1.7; }
+    ul { padding-left: 20px; margin-bottom: 14px; }
+    ul li { font-size: 15px; color: #3a3630; margin-bottom: 6px; line-height: 1.6; }
+
+    .highlight {
+      background: var(--amber-pale); border-left: 3px solid var(--amber);
+      padding: 14px 18px; border-radius: 0 6px 6px 0;
+      margin: 24px 0; font-size: 15px; color: #5A3508; line-height: 1.6;
+    }
+
+    footer {
+      border-top: 0.5px solid var(--border); padding: 20px 40px;
+      font-size: 12px; color: var(--muted);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--amber); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+        <rect x="2" y="26" width="96" height="58" rx="10" fill="#FAC775" fill-opacity="0.25"/>
+        <rect x="2" y="26" width="96" height="58" rx="10" stroke="#854F0B" stroke-width="5"/>
+        <circle cx="48" cy="55" r="7" fill="#854F0B"/>
+        <line x1="48" y1="26" x2="48" y2="84" stroke="#854F0B" stroke-width="3" stroke-dasharray="6 5" stroke-opacity="0.4"/>
+        <line x1="48" y1="6" x2="48" y2="26" stroke="#854F0B" stroke-width="4" stroke-linecap="round"/>
+        <line x1="34" y1="13" x2="48" y2="8" stroke="#854F0B" stroke-width="3" stroke-linecap="round"/>
+        <line x1="62" y1="13" x2="48" y2="8" stroke="#854F0B" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      Lastleaf
+    </a>
+    <a href="index.html" class="nav-back">← Back to home</a>
+  </nav>
+
+  <main>
+    <p class="page-label">Legal</p>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: June 2026</p>
+
+    <div class="highlight">
+      <strong>Short version:</strong> Lastleaf stores your tab history locally on your device using IndexedDB. We do not collect, sell, or share your personal data. The only external network requests are optional anonymous analytics (counting installs and rescued tabs — no tab content, no URLs) and an optional AI summary feature that sends note text to an AI model.
+    </div>
+
+    <h2>1. Who we are</h2>
+    <p>Lastleaf is a Chrome extension developed by Umbrova. You can reach us at <a href="mailto:hello@umbrova.com">hello@umbrova.com</a>.</p>
+
+    <h2>2. What data Lastleaf stores</h2>
+    <p>All data created by Lastleaf is stored locally on your device using IndexedDB via <code>chrome.storage.local</code>. This includes:</p>
+    <ul>
+      <li>Titles and URLs of tabs you close (above the minimum time threshold)</li>
+      <li>Time spent on each tab and session timestamps</li>
+      <li>Topic clusters derived from tab titles using local NLP processing</li>
+      <li>Extension settings — minimum tab time, excluded domains, retention period</li>
+    </ul>
+    <p>This data <strong>never leaves your device</strong> except as described in Sections 4 and 5 below. It is not transmitted to Umbrova or any third party. Uninstalling the extension permanently deletes all stored data.</p>
+
+    <h2>3. What data we do not collect</h2>
+    <p>Lastleaf does not collect, transmit, or store:</p>
+    <ul>
+      <li>Your name, email address, or any personally identifiable information</li>
+      <li>The content of web pages you visit</li>
+      <li>Cookies or tracking identifiers linked to your identity</li>
+      <li>Any data from domains on your excluded domains list</li>
+    </ul>
+    <p>There is no account system. No sign-up is required.</p>
+
+    <h2>4. Anonymous analytics (optional)</h2>
+    <p>Lastleaf includes optional anonymous usage analytics to help us understand how the extension is used. If enabled, the extension sends lightweight event counts to a backend service hosted on Vercel, which writes to Upstash Redis. The events tracked are:</p>
+    <ul>
+      <li><strong>install</strong> — when the extension is first installed</li>
+      <li><strong>tab_buried</strong> — each time a tab is captured</li>
+      <li><strong>tab_rescued</strong> — each time a tab is reopened from the dashboard</li>
+      <li><strong>dau</strong> — a daily active use signal (once per day)</li>
+    </ul>
+    <p>These events contain no tab titles, no URLs, no page content, and no personally identifiable information. They are pure counters. No data is shared with third parties and no data is used for advertising.</p>
+    <p>Analytics can be disabled in the extension settings at any time.</p>
+
+    <h2>5. Permissions</h2>
+    <p>Lastleaf requests the following Chrome permissions and uses them as follows:</p>
+    <ul>
+      <li><strong>storage</strong> — to save your tab history and settings locally on your device</li>
+      <li><strong>tabs</strong> — to detect when tabs are closed and read their title and URL</li>
+      <li><strong>history</strong> — to check time spent on tabs before they are captured</li>
+      <li><strong>scripting</strong> — to run the dashboard and popup pages</li>
+    </ul>
+
+    <h2>6. Third-party services</h2>
+    <p>The optional analytics feature uses the following third-party services:</p>
+    <ul>
+      <li><strong>Vercel</strong> — hosts the analytics proxy endpoint. Vercel's privacy policy: <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">vercel.com/legal/privacy-policy</a></li>
+      <li><strong>Upstash Redis</strong> — stores anonymous event counters. Upstash's privacy policy: <a href="https://upstash.com/privacy" target="_blank" rel="noopener">upstash.com/privacy</a></li>
+    </ul>
+
+    <h2>7. Data retention</h2>
+    <p>Full tab records are kept locally on your device for 90 days by default (adjustable in settings). After that, older records are automatically compressed to lightweight summaries to conserve storage space. You can clear all data at any time from the Settings page.</p>
+
+    <h2>8. Children's privacy</h2>
+    <p>Lastleaf is not directed at children under the age of 13. We do not knowingly collect any information from children.</p>
+
+    <h2>9. Changes to this policy</h2>
+    <p>If we make material changes to this privacy policy, we will update the "Last updated" date above. Continued use of the extension after changes constitutes acceptance of the updated policy.</p>
+
+    <h2>10. Contact</h2>
+    <p>If you have questions about this privacy policy or how Lastleaf handles your data, please contact us at <a href="mailto:hello@umbrova.com">hello@umbrova.com</a>.</p>
+  </main>
+
+  <footer>
+    <span>© 2026 Umbrova</span>
+    <span><a href="index.html">Lastleaf</a> · <a href="mailto:hello@umbrova.com">hello@umbrova.com</a></span>
+  </footer>
+
+</body>
+</html>

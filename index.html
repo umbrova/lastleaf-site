@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lastleaf — Remember what you closed</title>
+  <meta name="description" content="A Chrome extension that captures tabs you close, groups them by topic, and surfaces them as an interactive graph. Never lose a tab again."/>
+  <meta property="og:title" content="Lastleaf — Remember what you closed"/>
+  <meta property="og:description" content="Captures tabs you close, groups them by topic, surfaces them as an interactive graph."/>
+  <meta property="og:type" content="website"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --amber:        #854F0B;
+      --amber-mid:    #A86520;
+      --amber-light:  #FAC775;
+      --amber-pale:   #FDF3E3;
+      --amber-border: #E8C98A;
+      --bg:           #FAFAF7;
+      --bg-raised:    #FFFFFF;
+      --bg-sunken:    #F2F1EC;
+      --border:       rgba(0,0,0,0.07);
+      --border-med:   rgba(0,0,0,0.13);
+      --text:         #1C1A14;
+      --text-muted:   #6B5F47;
+      --text-faint:   #9E9080;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(133,79,11,0.05) 0%, transparent 50%),
+        radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 20px 20px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--amber); }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 40px;
+      background: var(--bg-raised);
+      border-bottom: 0.5px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px;
+      font-weight: 600; font-size: 15px; color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a {
+      font-size: 13px; color: var(--text-muted); text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--amber); }
+    .btn-install {
+      background: var(--amber); color: #fff;
+      padding: 7px 16px; border-radius: 7px;
+      font-size: 13px; font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-install:hover { background: var(--amber-mid); color: #fff; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 64px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+    .hero p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 400px;
+      margin: 0 auto 32px;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--amber); color: #fff;
+      padding: 11px 22px; border-radius: 7px;
+      font-size: 14px; font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .hero-cta:hover { background: var(--amber-mid); color: #fff; }
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+
+    /* SCREENSHOT / DEMO AREA */
+    .demo {
+      max-width: 900px;
+      margin: 0 auto 72px;
+      padding: 0 24px;
+    }
+    .demo-frame {
+      background: var(--bg-raised);
+      border: 1px solid var(--border-med);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .demo-bar {
+      background: var(--bg-sunken);
+      border-bottom: 0.5px solid var(--border);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .demo-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--border-med);
+    }
+    .demo-label {
+      margin-left: 8px;
+      font-size: 12px; color: var(--text-faint);
+    }
+    .demo-inner {
+      padding: 40px 32px;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Simulated graph clusters */
+    .cluster {
+      position: absolute;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-med);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      min-width: 160px;
+    }
+    .cluster-title { font-weight: 600; font-size: 12px; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .cluster-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .cluster-time { font-size: 11px; color: var(--text-faint); margin-bottom: 8px; }
+    .cluster-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+    .tag {
+      font-size: 10px; padding: 2px 8px; border-radius: 20px;
+      border: 1px solid; color: inherit;
+    }
+    .c1 { top: 20px; left: 60px; }
+    .c2 { top: 40px; right: 80px; }
+    .c3 { bottom: 30px; left: 200px; }
+    .graph-line {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* HOW IT WORKS */
+    .section { max-width: 800px; margin: 0 auto; padding: 0 24px 72px; }
+    .section-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-faint);
+      margin-bottom: 40px; text-align: center;
+    }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    @media (max-width: 640px) { .steps { grid-template-columns: 1fr; gap: 24px; } }
+    .step-num {
+      font-size: 11px; font-weight: 600; color: var(--amber);
+      letter-spacing: 0.06em; margin-bottom: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .step h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .step p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .features-grid { grid-template-columns: 1fr; } }
+    .feature-card {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 22px;
+    }
+    .feature-icon {
+      width: 32px; height: 32px;
+      background: var(--amber-pale);
+      border: 1px solid var(--amber-border);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+    .feature-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+    .feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+
+    /* CTA BAND */
+    .cta-band {
+      background: var(--amber-pale);
+      border-top: 1px solid var(--amber-border);
+      border-bottom: 1px solid var(--amber-border);
+      text-align: center;
+      padding: 56px 24px;
+      margin-bottom: 0;
+    }
+    .cta-band h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .cta-band p { font-size: 15px; color: var(--text-muted); margin-bottom: 28px; }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 20px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+      font-size: 12px; color: var(--text-faint);
+      background: var(--bg-raised);
+    }
+    footer a { color: var(--text-faint); text-decoration: none; }
+    footer a:hover { color: var(--amber); }
+    .footer-right { display: flex; gap: 16px; align-items: center; }
+
+    /* LOGO MARK */
+    .logo-mark svg { display: block; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+        <rect x="2" y="26" width="96" height="58" rx="10" fill="#FAC775" fill-opacity="0.25"/>
+        <rect x="2" y="26" width="96" height="58" rx="10" stroke="#854F0B" stroke-width="5"/>
+        <circle cx="48" cy="55" r="7" fill="#854F0B"/>
+        <line x1="48" y1="26" x2="48" y2="84" stroke="#854F0B" stroke-width="3" stroke-dasharray="6 5" stroke-opacity="0.4"/>
+        <line x1="48" y1="6" x2="48" y2="26" stroke="#854F0B" stroke-width="4" stroke-linecap="round"/>
+        <line x1="34" y1="13" x2="48" y2="8" stroke="#854F0B" stroke-width="3" stroke-linecap="round"/>
+        <line x1="62" y1="13" x2="48" y2="8" stroke="#854F0B" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      lastleaf
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="https://github.com/umbrova/lastleaf" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://chromewebstore.google.com/detail/lastleaf" class="btn-install" target="_blank" rel="noopener">Add to Chrome</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Remember what<br>you <em>closed.</em></h1>
+    <p>Lastleaf quietly captures tabs you close, groups them by topic, and surfaces them as an interactive graph. Your browsing history, actually useful.</p>
+    <a href="https://chromewebstore.google.com/detail/lastleaf" class="hero-cta" target="_blank" rel="noopener">
+      Add to Chrome — it's free
+    </a>
+    <p class="hero-sub">Free Chrome extension · No account needed</p>
+  </section>
+
+  <!-- DEMO FRAME -->
+  <div class="demo">
+    <div class="demo-frame">
+      <div class="demo-bar">
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <span class="demo-label">lastleaf dashboard · 6 clusters · 117 tabs buried</span>
+      </div>
+      <div class="demo-inner">
+        <svg class="graph-line" viewBox="0 0 900 220" preserveAspectRatio="none">
+          <line x1="240" y1="70" x2="500" y2="140" stroke="#E8C98A" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="680" y1="60" x2="500" y2="140" stroke="#E8C98A" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="500" y1="140" x2="350" y2="185" stroke="#E8C98A" stroke-width="1" stroke-dasharray="4 4"/>
+        </svg>
+
+        <div class="cluster c1">
+          <div class="cluster-title">
+            <span class="cluster-dot" style="background:#854F0B"></span>
+            Research / Design
+            <span style="color:var(--text-faint);font-weight:400">42</span>
+          </div>
+          <div class="cluster-time">1h 8m browsing</div>
+          <div class="cluster-tags">
+            <span class="tag" style="border-color:#E8C98A;color:#854F0B">design</span>
+            <span class="tag" style="border-color:#E8C98A;color:#854F0B">figma</span>
+          </div>
+        </div>
+
+        <div class="cluster c2">
+          <div class="cluster-title">
+            <span class="cluster-dot" style="background:#3B8A5C"></span>
+            Google / Search
+            <span style="color:var(--text-faint);font-weight:400">19</span>
+          </div>
+          <div class="cluster-time">7m browsing</div>
+          <div class="cluster-tags">
+            <span class="tag" style="border-color:#A8D4B8;color:#3B6D47">search</span>
+          </div>
+        </div>
+
+        <div class="cluster c3">
+          <div class="cluster-title">
+            <span class="cluster-dot" style="background:#6B7FD4"></span>
+            Neural / Network
+            <span style="color:var(--text-faint);font-weight:400">3</span>
+          </div>
+          <div class="cluster-time">2m browsing</div>
+          <div class="cluster-tags">
+            <span class="tag" style="border-color:#B8C2E8;color:#4A5AB0">neural</span>
+            <span class="tag" style="border-color:#B8C2E8;color:#4A5AB0">network</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <p class="section-label">How it works</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Install and forget</h3>
+        <p>Add Lastleaf to Chrome. It runs silently in the background — no setup, no accounts, no configuration needed.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Close tabs freely</h3>
+        <p>Lastleaf captures every tab you close (above a minimum time threshold you control) and groups them by topic automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Explore the graph</h3>
+        <p>Open the dashboard to see your tab history as an interactive graph — clusters of related tabs, time spent, and one-click restore.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <p class="section-label">Features</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🗂️</div>
+        <h3>Topic clusters</h3>
+        <p>Closed tabs are automatically grouped by topic using local NLP — no cloud processing, no data leaving your device.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🕸️</div>
+        <h3>Interactive graph</h3>
+        <p>See your browsing sessions as a visual map. Clusters float, connect, and reveal how your work actually flows.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>Time tracking</h3>
+        <p>Each cluster shows how long you spent browsing that topic — useful for understanding where your attention really went.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Private by default</h3>
+        <p>All tab data is stored locally in your browser. Nothing is synced, sold, or shared. Uninstall to delete everything.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚫</div>
+        <h3>Excluded domains</h3>
+        <p>Add domains you never want captured — banking sites, email, or anything sensitive. Lastleaf will skip them entirely.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>90-day history</h3>
+        <p>Full tab records kept for 90 days (adjustable), then automatically compressed to lightweight summaries to save space.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <div class="cta-band">
+    <h2>Your tab graveyard, finally useful.</h2>
+    <p>Free to install. No account needed. Works immediately.</p>
+    <a href="https://chromewebstore.google.com/detail/lastleaf" class="hero-cta" target="_blank" rel="noopener">
+      Add Lastleaf to Chrome
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© 2026 Umbrova</span>
+    <div class="footer-right">
+      <a href="privacy.html">Privacy</a>
+      <a href="https://github.com/umbrova/lastleaf" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:hello@umbrova.com">hello@umbrova.com</a>
+    </div>
+  </footer>
+
+</body>
+</html>
